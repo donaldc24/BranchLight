@@ -1,8 +1,8 @@
-import type { SearchResult } from '../types/search'
+import type { CategorizedResult } from '../types/search'
 
 type SearchResultCardProps = {
   position: number
-  result: SearchResult
+  result: CategorizedResult
 }
 
 export function SearchResultCard({
@@ -16,7 +16,7 @@ export function SearchResultCard({
           {position}
         </span>
         <div className="result-content">
-          <p className="result-url">{result.displayUrl}</p>
+          <p className="result-url">{result.domain}</p>
           <h3 className="result-title">
             <a
               href={result.url}
@@ -29,7 +29,7 @@ export function SearchResultCard({
               </span>
             </a>
           </h3>
-          <p className="result-description">{result.description}</p>
+          <p className="result-description">{result.snippet}</p>
         </div>
       </article>
     </li>

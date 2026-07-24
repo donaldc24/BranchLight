@@ -4,12 +4,14 @@ type SearchFormProps = {
   query: string
   onQueryChange: (query: string) => void
   onSubmit: () => void
+  isLoading: boolean
 }
 
 export function SearchForm({
   query,
   onQueryChange,
   onSubmit,
+  isLoading,
 }: SearchFormProps) {
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -17,7 +19,12 @@ export function SearchForm({
   }
 
   return (
-    <form className="search-form" role="search" onSubmit={handleSubmit}>
+    <form
+      className="search-form"
+      role="search"
+      aria-busy={isLoading}
+      onSubmit={handleSubmit}
+    >
       <label className="sr-only" htmlFor="search-query">
         Search the web
       </label>
@@ -42,7 +49,9 @@ export function SearchForm({
           autoComplete="off"
           autoFocus
         />
-        <button type="submit">Search</button>
+        <button type="submit" disabled={isLoading}>
+          {isLoading ? 'Searching…' : 'Search'}
+        </button>
       </div>
     </form>
   )

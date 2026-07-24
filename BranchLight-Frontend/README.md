@@ -1,22 +1,33 @@
 # BranchLight
 
-BranchLight is the first frontend-only slice of a personal search application. It
-provides a focused search form and displays five typed, mocked web results after
-each valid submission.
-
-This milestone intentionally has no backend, external search API, accounts,
-database, notebooks, or AI-generated content.
+BranchLight is a React frontend for a personal search application. It sends
+searches to the local Spring Boot backend and displays categorized results.
 
 ## Requirements
 
 - Node.js 20+
 - npm
+- The BranchLight backend running on port 8080
 
 ## Setup
 
 ```bash
 npm install
 ```
+
+Start the backend from `../BranchLight-Backend/`, then start the frontend:
+
+```powershell
+.\mvnw.cmd spring-boot:run
+```
+
+```bash
+npm run dev
+```
+
+The Vite development server proxies `/api` requests to
+`http://localhost:8080`. A production deployment should route `/api` to the
+Spring Boot backend as well.
 
 ## Commands
 
@@ -33,12 +44,12 @@ npm run preview   # Preview the production build locally
 
 ```text
 src/
+├── api/
+│   └── search.ts
 ├── components/
 │   ├── SearchForm.tsx
 │   ├── SearchResultCard.tsx
 │   └── SearchResults.tsx
-├── data/
-│   └── mockSearchResults.ts
 ├── test/
 │   └── setup.ts
 ├── types/
@@ -48,7 +59,3 @@ src/
 ├── App.tsx
 └── main.tsx
 ```
-
-The five mock results are reused for every valid query. A real search service can
-replace that data source in a later milestone without changing the basic result
-components.

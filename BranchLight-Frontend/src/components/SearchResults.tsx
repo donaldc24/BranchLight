@@ -1,9 +1,9 @@
-import type { SearchResult } from '../types/search'
+import type { CategorizedResult } from '../types/search'
 import { SearchResultCard } from './SearchResultCard'
 
 type SearchResultsProps = {
   query: string
-  results: SearchResult[]
+  results: CategorizedResult[]
 }
 
 export function SearchResults({ query, results }: SearchResultsProps) {
@@ -18,7 +18,7 @@ export function SearchResults({ query, results }: SearchResultsProps) {
       <ol className="results-list" role="list">
         {results.map((result, index) => (
           <SearchResultCard
-            key={result.id}
+            key={`${result.role}:${result.url}`}
             position={index + 1}
             result={result}
           />
