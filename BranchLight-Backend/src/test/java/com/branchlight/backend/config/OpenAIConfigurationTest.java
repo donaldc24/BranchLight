@@ -23,6 +23,11 @@ class OpenAIConfigurationTest {
             new ApplicationContextRunner()
                     .withInitializer(
                             new ConfigDataApplicationContextInitializer())
+                    .withPropertyValues(
+                            "OPENAI_API_KEY=",
+                            "BRANCHLIGHT_OPENAI_QUERY_GENERATION_ENABLED=false",
+                            "OPENAI_QUERY_MODEL=",
+                            "BRANCHLIGHT_OPENAI_QUERY_GENERATION_PRIORITY=false")
                     .withUserConfiguration(OpenAIConfiguration.class);
 
     @Test
@@ -31,6 +36,10 @@ class OpenAIConfigurationTest {
         contextRunner
                 .withPropertyValues(
                         "BRANCHLIGHT_OPENAI_QUERY_GENERATION_ENABLED=true",
+                        "BRANCHLIGHT_OPENAI_QUERY_GENERATION_PRIORITY=true",
+                        "BRANCHLIGHT_OPENAI_QUERY_GENERATION_MAX_OUTPUT_TOKENS=128",
+                        "BRANCHLIGHT_OPENAI_QUERY_GENERATION_REASONING_EFFORT=LOW",
+                        "BRANCHLIGHT_OPENAI_QUERY_GENERATION_VERBOSITY=HIGH",
                         "OPENAI_API_KEY=" + FAKE_API_KEY,
                         "OPENAI_QUERY_MODEL=test-query-model")
                 .run(context -> {
@@ -45,6 +54,14 @@ class OpenAIConfigurationTest {
                     assertThat(properties.enabled()).isTrue();
                     assertThat(properties.model())
                             .isEqualTo("test-query-model");
+                    assertThat(properties.priority()).isTrue();
+                    assertThat(properties.maxOutputTokens()).isEqualTo(128);
+                    assertThat(properties.reasoningEffort()).isEqualTo(
+                            OpenAIQueryGenerationProperties
+                                    .ReasoningEffortSetting.LOW);
+                    assertThat(properties.verbosity()).isEqualTo(
+                            OpenAIQueryGenerationProperties
+                                    .VerbositySetting.HIGH);
                 });
 
         assertThat(output).doesNotContain(FAKE_API_KEY);
@@ -109,6 +126,14 @@ class OpenAIConfigurationTest {
                     OpenAIQueryGenerationProperties.class);
             assertThat(properties.enabled()).isFalse();
             assertThat(properties.model()).isEmpty();
+            assertThat(properties.priority()).isFalse();
+            assertThat(properties.maxOutputTokens()).isEqualTo(96);
+            assertThat(properties.reasoningEffort()).isEqualTo(
+                    OpenAIQueryGenerationProperties
+                            .ReasoningEffortSetting.NONE);
+            assertThat(properties.verbosity()).isEqualTo(
+                    OpenAIQueryGenerationProperties
+                            .VerbositySetting.LOW);
         });
     }
 

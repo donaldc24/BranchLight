@@ -11,6 +11,9 @@ import org.mockito.ArgumentCaptor;
 import com.branchlight.backend.search.query.GeneratedQuery;
 import com.branchlight.backend.search.query.QueryPurpose;
 import com.openai.client.OpenAIClient;
+import com.openai.models.ReasoningEffort;
+import com.openai.models.responses.ResponseCreateParams;
+import com.openai.models.responses.ResponseTextConfig;
 import com.openai.models.responses.StructuredResponse;
 import com.openai.models.responses.StructuredResponseCreateParams;
 import com.openai.models.responses.StructuredResponseOutputItem;
@@ -97,7 +100,15 @@ class OpenAiQueryVariantGeneratorTest {
                 .isEqualTo(originalQuery.strip());
         assertThat(rawParams.model().orElseThrow().asString())
                 .isEqualTo("test-query-model");
+        assertThat(rawParams.maxOutputTokens()).contains(96L);
+        assertThat(rawParams.reasoning()
+                .orElseThrow()
+                .effort()).contains(ReasoningEffort.NONE);
         assertThat(rawParams.store()).contains(false);
+        assertThat(rawParams.serviceTier()).isEmpty();
+        assertThat(rawParams.text()
+                .orElseThrow()
+                .verbosity()).contains(ResponseTextConfig.Verbosity.LOW);
         assertThat(textFormat.isJsonSchema()).isTrue();
         assertThat(textFormat.asJsonSchema().strict()).contains(true);
         assertThat(rawParams.instructions().orElseThrow())
@@ -113,9 +124,59 @@ class OpenAiQueryVariantGeneratorTest {
                         "explicit negation",
                         "explicit search operators",
                         "meaningfully different",
-                        "unchanged original query")
+                        "unchanged original query",
+                        "exactly five search-query variants",
+                        "under 12 words",
+                        "Do not explain")
                 .doesNotContain(originalQuery.strip());
         verify(openAIClient, times(1)).responses();
+    }
+
+    @Test
+    void requestsPriorityProcessingOnlyWhenEnabled() {
+        generator = new OpenAiQueryVariantGenerator(
+                openAIClient,
+                "test-query-model",
+                true);
+        stubResponse(structuredResponse(validVariants()));
+
+        generator.generate("sample query");
+
+        ArgumentCaptor<StructuredResponseCreateParams<
+                OpenAiQueryVariantsResponse>> captor =
+                createParamsCaptor();
+        verify(responseService).create(captor.capture());
+        assertThat(captor.getValue()
+                .rawParams()
+                .serviceTier()).contains(
+                        ResponseCreateParams.ServiceTier.PRIORITY);
+    }
+
+    @Test
+    void appliesConfiguredGenerationSettings() {
+        generator = new OpenAiQueryVariantGenerator(
+                openAIClient,
+                "test-query-model",
+                128,
+                ReasoningEffort.LOW,
+                ResponseTextConfig.Verbosity.HIGH,
+                false);
+        stubResponse(structuredResponse(validVariants()));
+
+        generator.generate("sample query");
+
+        ArgumentCaptor<StructuredResponseCreateParams<
+                OpenAiQueryVariantsResponse>> captor =
+                createParamsCaptor();
+        verify(responseService).create(captor.capture());
+        var rawParams = captor.getValue().rawParams();
+        assertThat(rawParams.maxOutputTokens()).contains(128L);
+        assertThat(rawParams.reasoning()
+                .orElseThrow()
+                .effort()).contains(ReasoningEffort.LOW);
+        assertThat(rawParams.text()
+                .orElseThrow()
+                .verbosity()).contains(ResponseTextConfig.Verbosity.HIGH);
     }
 
     @Test

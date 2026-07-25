@@ -1,4 +1,9 @@
 branchlight:
+  openai:
+    query-generation:
+      max-output-tokens: ${BRANCHLIGHT_OPENAI_QUERY_GENERATION_MAX_OUTPUT_TOKENS:96}
+      reasoning-effort: ${BRANCHLIGHT_OPENAI_QUERY_GENERATION_REASONING_EFFORT:NONE}
+      verbosity: ${BRANCHLIGHT_OPENAI_QUERY_GENERATION_VERBOSITY:LOW}
   search:
     execution:
       # Provider requests are I/O-bound. Keep this below upstream rate limits.

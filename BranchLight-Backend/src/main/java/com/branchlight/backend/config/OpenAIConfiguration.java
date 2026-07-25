@@ -42,7 +42,11 @@ public class OpenAIConfiguration {
             OpenAIQueryGenerationProperties properties) {
         return new OpenAiQueryVariantGenerator(
                 openAIClient,
-                properties.model());
+                properties.model(),
+                properties.maxOutputTokens(),
+                properties.reasoningEffort().openAiValue(),
+                properties.verbosity().openAiValue(),
+                properties.priority());
     }
 
     static final class OpenAIApiKeyPresentCondition implements Condition {

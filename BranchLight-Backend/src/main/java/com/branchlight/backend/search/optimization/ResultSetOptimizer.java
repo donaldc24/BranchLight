@@ -62,12 +62,17 @@ public final class ResultSetOptimizer {
             }
         }
 
+        double[][] candidateRoleScores = candidateRoleScores(candidates);
+        double[][] pairPenalties = pairPenalties(candidates);
         var best = new BestAssignment();
         search(
                 0,
                 candidates,
                 new EnumMap<>(SearchRole.class),
-                new HashSet<>(),
+                new boolean[candidates.size()],
+                new ArrayList<>(),
+                candidateRoleScores,
+                pairPenalties,
                 0.0,
                 0.0,
                 best);
@@ -82,7 +87,10 @@ public final class ResultSetOptimizer {
             int roleIndex,
             List<OptimizationCandidate> candidates,
             EnumMap<SearchRole, OptimizationCandidate> assignment,
-            Set<String> usedDocumentIds,
+            boolean[] usedCandidates,
+            List<Integer> selectedCandidateIndexes,
+            double[][] candidateRoleScores,
+            double[][] pairPenalties,
             double roleScore,
             double setPenalty,
             BestAssignment best) {
@@ -90,40 +98,106 @@ public final class ResultSetOptimizer {
             best.consider(assignment, roleScore, setPenalty);
             return;
         }
-
-        SearchRole role = SearchRole.values()[roleIndex];
-        search(
-                roleIndex + 1,
-                candidates,
-                assignment,
-                usedDocumentIds,
+        if (!canMatchBestObjective(
+                roleIndex,
+                usedCandidates,
+                candidateRoleScores,
                 roleScore,
                 setPenalty,
-                best);
+                best.objective)) {
+            return;
+        }
 
-        for (OptimizationCandidate candidate : candidates) {
-            if (usedDocumentIds.contains(candidate.documentId())
-                    || !acceptable(candidate, role)) {
+        SearchRole role = SearchRole.values()[roleIndex];
+        for (int candidateIndex = 0;
+                candidateIndex < candidates.size();
+                candidateIndex++) {
+            double candidateRoleScore =
+                    candidateRoleScores[candidateIndex][roleIndex];
+            if (usedCandidates[candidateIndex]
+                    || !Double.isFinite(candidateRoleScore)) {
                 continue;
             }
-            double incrementalPenalty = assignment.values().stream()
-                    .mapToDouble(selected -> pairPenalty(
-                            candidate,
-                            selected))
-                    .sum();
+            double incrementalPenalty = 0.0;
+            for (int selectedIndex : selectedCandidateIndexes) {
+                incrementalPenalty +=
+                        pairPenalties[candidateIndex][selectedIndex];
+            }
+            OptimizationCandidate candidate = candidates.get(candidateIndex);
             assignment.put(role, candidate);
-            usedDocumentIds.add(candidate.documentId());
+            usedCandidates[candidateIndex] = true;
+            selectedCandidateIndexes.add(candidateIndex);
             search(
                     roleIndex + 1,
                     candidates,
                     assignment,
-                    usedDocumentIds,
-                    roleScore + roleScore(candidate, role),
+                    usedCandidates,
+                    selectedCandidateIndexes,
+                    candidateRoleScores,
+                    pairPenalties,
+                    roleScore + candidateRoleScore,
                     setPenalty + incrementalPenalty,
                     best);
-            usedDocumentIds.remove(candidate.documentId());
+            selectedCandidateIndexes.remove(
+                    selectedCandidateIndexes.size() - 1);
+            usedCandidates[candidateIndex] = false;
             assignment.remove(role);
         }
+        search(
+                roleIndex + 1,
+                candidates,
+                assignment,
+                usedCandidates,
+                selectedCandidateIndexes,
+                candidateRoleScores,
+                pairPenalties,
+                roleScore,
+                setPenalty,
+                best);
+    }
+
+    private static boolean canMatchBestObjective(
+            int roleIndex,
+            boolean[] usedCandidates,
+            double[][] candidateRoleScores,
+            double roleScore,
+            double setPenalty,
+            double bestObjective) {
+        double optimisticObjective = roleScore - setPenalty;
+        for (int remainingRole = roleIndex;
+                remainingRole < SearchRole.values().length;
+                remainingRole++) {
+            double bestRemainingRoleScore = 0.0;
+            for (int candidateIndex = 0;
+                    candidateIndex < candidateRoleScores.length;
+                    candidateIndex++) {
+                if (!usedCandidates[candidateIndex]) {
+                    bestRemainingRoleScore = Math.max(
+                            bestRemainingRoleScore,
+                            candidateRoleScores[candidateIndex][remainingRole]);
+                }
+            }
+            optimisticObjective += bestRemainingRoleScore;
+        }
+        return optimisticObjective >= bestObjective - COMPARISON_EPSILON;
+    }
+
+    private double[][] candidateRoleScores(
+            List<OptimizationCandidate> candidates) {
+        double[][] scores = new double[candidates.size()]
+                [SearchRole.values().length];
+        for (int candidateIndex = 0;
+                candidateIndex < candidates.size();
+                candidateIndex++) {
+            OptimizationCandidate candidate = candidates.get(candidateIndex);
+            for (SearchRole role : SearchRole.values()) {
+                scores[candidateIndex][role.ordinal()] =
+                        acceptable(candidate, role)
+                                ? roleScore(candidate, role)
+                                : Double.NEGATIVE_INFINITY;
+            }
+        }
+        return scores;
     }
 
     private boolean acceptable(
@@ -135,30 +209,53 @@ public final class ResultSetOptimizer {
                 && score.finalScore() >= configuration.minimumScore(role);
     }
 
+    private double[][] pairPenalties(
+            List<OptimizationCandidate> candidates) {
+        var pairData = candidates.stream()
+                .map(ResultSetOptimizer::pairData)
+                .toList();
+        double[][] penalties = new double[candidates.size()][candidates.size()];
+        for (int firstIndex = 0;
+                firstIndex < candidates.size();
+                firstIndex++) {
+            for (int secondIndex = firstIndex + 1;
+                    secondIndex < candidates.size();
+                    secondIndex++) {
+                double penalty = pairPenalty(
+                        pairData.get(firstIndex),
+                        pairData.get(secondIndex));
+                penalties[firstIndex][secondIndex] = penalty;
+                penalties[secondIndex][firstIndex] = penalty;
+            }
+        }
+        return penalties;
+    }
+
     private double pairPenalty(
-            OptimizationCandidate first,
-            OptimizationCandidate second) {
+            CandidatePairData first,
+            CandidatePairData second) {
         double penalty = 0.0;
         if (configuration.repeatedRootDomainPenalty() > 0.0
-                && rootDomain(first).equals(rootDomain(second))) {
+                && first.rootDomain().equals(second.rootDomain())) {
             penalty += configuration.repeatedRootDomainPenalty();
         }
         if (configuration.similarTitlePenalty() > 0.0
                 && similarity(
-                        title(first),
-                        title(second))
+                        first.titleTerms(),
+                        second.titleTerms())
                         >= configuration.titleSimilarityThreshold()) {
             penalty += configuration.similarTitlePenalty();
         }
         if (configuration.similarSnippetPenalty() > 0.0
                 && similarity(
-                        snippets(first),
-                        snippets(second))
+                        first.snippetTerms(),
+                        second.snippetTerms())
                         >= configuration.snippetSimilarityThreshold()) {
             penalty += configuration.similarSnippetPenalty();
         }
         if (configuration.identicalRetrievalPathPenalty() > 0.0
-                && identicalRetrievalPath(first, second)) {
+                && !first.retrievalPath().isEmpty()
+                && first.retrievalPath().equals(second.retrievalPath())) {
             penalty += configuration.identicalRetrievalPathPenalty();
         }
         return penalty;
@@ -334,9 +431,9 @@ public final class ResultSetOptimizer {
         return labels[labels.length - 2] + "." + labels[labels.length - 1];
     }
 
-    private static double similarity(String first, String second) {
-        Set<String> firstTerms = terms(first);
-        Set<String> secondTerms = terms(second);
+        private static double similarity(
+                        Set<String> firstTerms,
+                        Set<String> secondTerms) {
         if (firstTerms.isEmpty() || secondTerms.isEmpty()) {
             return 0.0;
         }
@@ -356,12 +453,13 @@ public final class ResultSetOptimizer {
         return terms;
     }
 
-    private static boolean identicalRetrievalPath(
-            OptimizationCandidate first,
-            OptimizationCandidate second) {
-        Set<String> firstPath = retrievalPath(first);
-        return !firstPath.isEmpty()
-                && firstPath.equals(retrievalPath(second));
+    private static CandidatePairData pairData(
+            OptimizationCandidate candidate) {
+        return new CandidatePairData(
+                rootDomain(candidate),
+                terms(title(candidate)),
+                terms(snippets(candidate)),
+                retrievalPath(candidate));
     }
 
     private static Set<String> retrievalPath(
@@ -377,6 +475,13 @@ public final class ResultSetOptimizer {
                                 .toLowerCase(Locale.ROOT)));
         return queries;
     }
+
+        private record CandidatePairData(
+                        String rootDomain,
+                        Set<String> titleTerms,
+                        Set<String> snippetTerms,
+                        Set<String> retrievalPath) {
+        }
 
     private static final class BestAssignment {
 

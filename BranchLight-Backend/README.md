@@ -126,6 +126,16 @@ is enabled and a nonblank backend API key is available:
 - `OPENAI_API_KEY` supplies the required backend-only API credential.
 - `OPENAI_QUERY_MODEL` selects the model used for query generation. It is
   required when query generation is enabled with an API key.
+- `BRANCHLIGHT_OPENAI_QUERY_GENERATION_PRIORITY` enables OpenAI Priority
+  processing for query generation. It defaults to `false` and may incur
+  premium pricing.
+- `BRANCHLIGHT_OPENAI_QUERY_GENERATION_MAX_OUTPUT_TOKENS` caps generated
+  output tokens and defaults to `96`. It must be greater than zero.
+- `BRANCHLIGHT_OPENAI_QUERY_GENERATION_REASONING_EFFORT` sets reasoning to
+  `NONE`, `MINIMAL`, `LOW`, `MEDIUM`, `HIGH`, `XHIGH`, or `MAX`. It defaults
+  to `NONE`; choose an effort supported by the configured model.
+- `BRANCHLIGHT_OPENAI_QUERY_GENERATION_VERBOSITY` sets response verbosity to
+  `LOW`, `MEDIUM`, or `HIGH`. It defaults to `LOW`.
 - `BRANCHLIGHT_QUERY_VARIANT_MAX_LENGTH` sets the maximum accepted length of
   each OpenAI-generated query variant. It defaults to `400`.
 

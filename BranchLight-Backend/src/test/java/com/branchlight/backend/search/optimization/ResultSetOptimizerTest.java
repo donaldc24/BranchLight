@@ -8,6 +8,7 @@ import java.util.Map;
 import org.junit.jupiter.api.Test;
 
 import com.branchlight.backend.search.aggregation.AggregatedSearchResult;
+import com.branchlight.backend.search.aggregation.RetrievalMetadata;
 import com.branchlight.backend.search.content.ExtractedBlock;
 import com.branchlight.backend.search.content.ExtractedDocument;
 import com.branchlight.backend.search.content.Passage;
@@ -169,6 +170,49 @@ class ResultSetOptimizerTest {
         assertThat(result.totalSetScore()).isEqualTo(1.70);
     }
 
+    @Test
+    void appliesEveryPrecomputedPairPenalty() {
+        ResultSetOptimizer optimizer = new ResultSetOptimizer(
+                new ResultSetOptimizerConfiguration(
+                        ResultSetOptimizerConfiguration
+                                .uniformThresholds(0.20),
+                        0.01,
+                        0.02,
+                        0.03,
+                        0.04,
+                        0.80,
+                        0.80));
+        var retrievals = List.of(new RetrievalMetadata(
+                " Shared Query ",
+                "test-purpose"));
+        OptimizationCandidate authority = candidate(
+                "authority",
+                "authority.example.com",
+                "Shared title tokens",
+                List.of("Shared snippet tokens"),
+                retrievals,
+                Map.of(SearchRole.AUTHORITATIVE, 0.90));
+        OptimizationCandidate explanation = candidate(
+                "explanation",
+                "guide.example.com",
+                "Shared title tokens",
+                List.of("Shared snippet tokens"),
+                retrievals,
+                Map.of(SearchRole.EXPLANATORY, 0.90));
+
+        OptimizedResultSet result = optimizer.optimize(List.of(
+                authority,
+                explanation));
+
+        assertThat(result.selectedSources())
+                .containsOnlyKeys(
+                        SearchRole.AUTHORITATIVE,
+                        SearchRole.EXPLANATORY);
+        assertThat(result.totalRoleScore()).isEqualTo(1.80);
+        assertThat(result.totalSetPenalty()).isEqualTo(0.10);
+        assertThat(result.totalSetScore()).isEqualTo(1.70);
+    }
+
     private static ResultSetOptimizer optimizer(
             double threshold,
             double repeatedDomainPenalty) {
@@ -189,6 +233,22 @@ class ResultSetOptimizerTest {
             String host,
             String title,
             Map<SearchRole, Double> configuredScores) {
+        return candidate(
+                documentId,
+                host,
+                title,
+                List.of("Distinct snippet for " + documentId),
+                List.of(),
+                configuredScores);
+    }
+
+    private static OptimizationCandidate candidate(
+            String documentId,
+            String host,
+            String title,
+            List<String> snippets,
+            List<RetrievalMetadata> retrievals,
+            Map<SearchRole, Double> configuredScores) {
         String text = "Candidate source text for optimization.";
         SourcePosition position = new SourcePosition(0, text.length());
         var document = new ExtractedDocument(
@@ -205,8 +265,8 @@ class ResultSetOptimizerTest {
                 title,
                 1,
                 null,
-                List.of("Distinct snippet for " + documentId),
-                List.of());
+                snippets,
+                retrievals);
         var candidateDocument = new CandidateDocument(
                 searchResult,
                 document,
