@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <title>Invalid structured count</title>
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Article",
+      "commentCount": -12
+    }
+  </script>
+</head>
+<body>
+  <article>
+    <h1>Negative comment counts are invalid</h1>
+    <p>This article contains enough meaningful prose for extraction while deliberately avoiding comment or reply containers. A negative count in structured metadata must not become a positive estimate.</p>
+    <p>The remaining text provides a second substantive block so candidate selection is stable and the assertion focuses only on validating the declared count.</p>
+  </article>
+</body>
+</html>

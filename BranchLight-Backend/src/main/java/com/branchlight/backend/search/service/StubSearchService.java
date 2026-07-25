@@ -3,12 +3,16 @@ package com.branchlight.backend.search.service;
 import java.net.URI;
 import java.util.List;
 
+import org.springframework.context.annotation.Primary;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
 import com.branchlight.backend.search.domain.SearchResult;
 import com.branchlight.backend.search.domain.SearchRole;
 
 @Service
+@Primary
+@Profile({"test", "development"})
 public class StubSearchService implements SearchService {
 
     private static final List<SearchResult> RESULTS = List.of(

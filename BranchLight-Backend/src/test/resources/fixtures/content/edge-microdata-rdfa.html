@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <title>Structured HTML metadata</title>
+</head>
+<body>
+  <main>
+    <article itemscope itemtype="https://schema.org/Article">
+      <meta itemprop="genre" content="Analysis">
+      <h1 itemprop="headline">Metadata embedded in ordinary HTML</h1>
+      <p itemprop="description">Microdata can describe an article while its visible prose remains available for ordinary content extraction and relevance analysis.</p>
+      <p>This second paragraph adds meaningful explanatory text and ensures the selected page content is not dependent on invisible metadata values.</p>
+    </article>
+    <section vocab="https://schema.org/" typeof="Review">
+      <meta property="reviewAspect" content="Evidence quality">
+      <meta property="publisher" content="Evidence Review Collective">
+      <time property="datePublished" datetime="2025-02-03">February 3, 2025</time>
+      <p>A short review section records an RDFa property and contributes another useful observation about the evidence presented in the article.</p>
+    </section>
+  </main>
+</body>
+</html>

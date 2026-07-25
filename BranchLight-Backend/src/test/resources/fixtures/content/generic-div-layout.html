@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title>Dense Generic Layout</title>
+    <link rel="canonical" href="mailto:not-canonical@example.test">
+</head>
+<body>
+<div class="top-menu">
+    <a href="/one">Menu one</a>
+    <a href="/two">Menu two</a>
+    <a href="/three">Menu three</a>
+</div>
+
+<div class="layout-shell">
+    <div id="content-column">
+        <h1>Finding content without semantic landmarks</h1>
+        <p>
+            Some useful pages rely on ordinary containers instead of main or
+            article elements. A generic extractor can still locate the central
+            prose by considering text density, paragraph structure, and link
+            density without recognizing a particular site.
+        </p>
+        <p>
+            The selected region should keep explanatory material, preserve its
+            headings, and avoid nearby navigation or recommendation panels.
+            This paragraph provides enough evidence for a stable generic choice.
+        </p>
+        <h2>A second section</h2>
+        <p>
+            Relative links remain internal, while links to a different host are
+            counted as outbound sources for diagnostic scoring.
+            <a href="/same-host">Internal source</a>
+            <a href="https://external.example/source">External source</a>
+        </p>
+    </div>
+
+    <div class="sidebar">
+        <a href="https://sidebar.example/one">Sidebar destination one</a>
+        <a href="https://sidebar.example/two">Sidebar destination two</a>
+    </div>
+</div>
+
+<div class="cookie-consent">Cookie consent text is not useful prose.</div>
+<section class="related-content">
+    <p>Related and recommended content should be removed.</p>
+</section>
+</body>
+</html>

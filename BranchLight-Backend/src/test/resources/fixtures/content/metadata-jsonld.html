@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title>Metadata Across Generic Pages</title>
+    <meta name="author" content="Fallback Meta Author">
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "Article",
+          "headline": "A Structured Metadata Headline",
+          "author": [
+            {"@type": "Person", "name": "Jordan Lee"},
+            {"@type": "Person", "name": "Morgan Ray"}
+          ],
+          "publisher": {
+            "@type": "Organization",
+            "name": "Independent Press"
+          },
+          "datePublished": "2025-11-03",
+          "dateModified": "2025-11-08T10:15:00Z",
+          "description": "Description discovered from structured metadata.",
+          "commentCount": 14
+        }
+      ]
+    }
+    </script>
+    <script type="application/ld+json">
+        {"@type":"Article","headline":
+    </script>
+</head>
+<body>
+<main>
+    <article>
+        <h1>Metadata Across Generic Pages</h1>
+        <p>
+            Structured metadata can preserve useful facts even when visual
+            templates vary widely. Extractors should retain the raw evidence
+            while selecting a clear value for downstream processing.
+        </p>
+        <p>
+            Malformed sibling blocks should not erase valid metadata or prevent
+            useful page text from being returned. Tolerant processing keeps the
+            successful evidence and exposes the original declarations.
+        </p>
+    </article>
+</main>
+</body>
+</html>

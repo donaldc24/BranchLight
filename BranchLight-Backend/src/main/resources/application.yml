@@ -1,0 +1,9 @@
+branchlight:
+  search:
+    execution:
+      # Provider requests are I/O-bound. Keep this below upstream rate limits.
+      provider-query-parallelism: ${BRANCHLIGHT_PROVIDER_QUERY_PARALLELISM:6}
+      # Page downloads are the main latency source; HttpPageFetcher caps at 25.
+      page-fetch-parallelism: ${BRANCHLIGHT_PAGE_FETCH_PARALLELISM:25}
+      # Extraction and deterministic per-document evaluation are CPU-bound.
+      page-processing-parallelism: ${BRANCHLIGHT_PAGE_PROCESSING_PARALLELISM:8}
