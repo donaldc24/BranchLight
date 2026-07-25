@@ -130,10 +130,10 @@ is enabled and a nonblank backend API key is available:
   processing for query generation. It defaults to `false` and may incur
   premium pricing.
 - `BRANCHLIGHT_OPENAI_QUERY_GENERATION_MAX_OUTPUT_TOKENS` caps generated
-  output tokens and defaults to `96`. It must be greater than zero.
+  output tokens and defaults to `256`. It must be greater than zero.
 - `BRANCHLIGHT_OPENAI_QUERY_GENERATION_REASONING_EFFORT` sets reasoning to
   `NONE`, `MINIMAL`, `LOW`, `MEDIUM`, `HIGH`, `XHIGH`, or `MAX`. It defaults
-  to `NONE`; choose an effort supported by the configured model.
+  to `MINIMAL`; choose an effort supported by the configured model.
 - `BRANCHLIGHT_OPENAI_QUERY_GENERATION_VERBOSITY` sets response verbosity to
   `LOW`, `MEDIUM`, or `HIGH`. It defaults to `LOW`.
 - `BRANCHLIGHT_QUERY_VARIANT_MAX_LENGTH` sets the maximum accepted length of

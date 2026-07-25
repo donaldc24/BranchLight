@@ -180,7 +180,7 @@ class DeterministicRoleScorerTest {
     }
 
     @Test
-    void retrievalPurposeProvidesOnlySmallSupport() {
+        void retrievalPurposeProvidesMeaningfulSupport() {
         Map<SourceFeature, Double> values = Map.of(
                 SourceFeature.ORDERED_STEPS,
                 0.8,
@@ -210,10 +210,10 @@ class DeterministicRoleScorerTest {
 
         assertThat(matched.finalScore()).isGreaterThan(unmatched.finalScore());
         assertThat(matched.finalScore() - unmatched.finalScore())
-                .isLessThanOrEqualTo(0.03);
+                .isBetween(0.10, 0.11);
         assertThat(matched.scoreBreakdown()
                 .retrievalPurposeMatch()
-                .normalizedWeight()).isLessThanOrEqualTo(0.03);
+                .normalizedWeight()).isBetween(0.10, 0.11);
     }
 
     @Test

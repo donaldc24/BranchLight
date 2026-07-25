@@ -4,31 +4,33 @@ import com.fasterxml.jackson.annotation.JsonClassDescription;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 
 @JsonClassDescription(
-        "Five concise search-engine query variants, one for each "
-                + "retrieval purpose.")
+        "Five distinct search-engine queries, each steering retrieval "
+                + "toward a different source type.")
 public final class OpenAiQueryVariantsResponse {
 
     @JsonPropertyDescription(
-            "A query oriented toward original, official, primary, "
-                    + "or direct sources.")
+            "A query explicitly targeting official documentation, "
+                    + "government, university, standards, primary "
+                    + "research, or institutional sources.")
     public String authoritative;
 
     @JsonPropertyDescription(
-            "A query oriented toward a clear explanation or overview.")
+            "A query explicitly targeting educational explainers, "
+                    + "reference material, or clear overviews.")
     public String explanatory;
 
     @JsonPropertyDescription(
-            "A query oriented toward examples, procedures, guides, "
-                    + "or practical application.")
+            "A query explicitly targeting tutorials, repair guides, "
+                    + "procedures, demonstrations, or examples.")
     public String practical;
 
     @JsonPropertyDescription(
-            "A query oriented toward limitations, risks, "
-                    + "counterarguments, or tradeoffs.")
+            "A query explicitly targeting limitations, risks, failure "
+                    + "modes, criticism, or opposing evidence.")
     public String critical;
 
     @JsonPropertyDescription(
-            "A query oriented toward firsthand experiences "
-                    + "or substantive human discussion.")
+            "A query explicitly targeting forums, community discussions, "
+                    + "firsthand experiences, or practitioner accounts.")
     public String humanDiscussion;
 }

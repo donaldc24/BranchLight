@@ -1,8 +1,8 @@
 branchlight:
   openai:
     query-generation:
-      max-output-tokens: ${BRANCHLIGHT_OPENAI_QUERY_GENERATION_MAX_OUTPUT_TOKENS:96}
-      reasoning-effort: ${BRANCHLIGHT_OPENAI_QUERY_GENERATION_REASONING_EFFORT:NONE}
+      max-output-tokens: ${BRANCHLIGHT_OPENAI_QUERY_GENERATION_MAX_OUTPUT_TOKENS:256}
+      reasoning-effort: ${BRANCHLIGHT_OPENAI_QUERY_GENERATION_REASONING_EFFORT:MINIMAL}
       verbosity: ${BRANCHLIGHT_OPENAI_QUERY_GENERATION_VERBOSITY:LOW}
   search:
     execution:

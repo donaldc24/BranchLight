@@ -127,10 +127,10 @@ class OpenAIConfigurationTest {
             assertThat(properties.enabled()).isFalse();
             assertThat(properties.model()).isEmpty();
             assertThat(properties.priority()).isFalse();
-            assertThat(properties.maxOutputTokens()).isEqualTo(96);
+            assertThat(properties.maxOutputTokens()).isEqualTo(256);
             assertThat(properties.reasoningEffort()).isEqualTo(
                     OpenAIQueryGenerationProperties
-                            .ReasoningEffortSetting.NONE);
+                            .ReasoningEffortSetting.MINIMAL);
             assertThat(properties.verbosity()).isEqualTo(
                     OpenAIQueryGenerationProperties
                             .VerbositySetting.LOW);

@@ -17,9 +17,9 @@ public record OpenAIQueryGenerationProperties(
 
     public OpenAIQueryGenerationProperties {
         model = model == null ? "" : model;
-        maxOutputTokens = maxOutputTokens == null ? 96 : maxOutputTokens;
+        maxOutputTokens = maxOutputTokens == null ? 256 : maxOutputTokens;
         reasoningEffort = reasoningEffort == null
-                ? ReasoningEffortSetting.NONE
+            ? ReasoningEffortSetting.MINIMAL
                 : reasoningEffort;
         verbosity = verbosity == null
                 ? VerbositySetting.LOW

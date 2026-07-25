@@ -129,7 +129,7 @@ public record RoleScoringConfiguration(
                 0.13,
                 0.05,
                 0.10,
-                0.02,
+                0.10,
                 0.30,
                 1_825,
                 roleFeatures,

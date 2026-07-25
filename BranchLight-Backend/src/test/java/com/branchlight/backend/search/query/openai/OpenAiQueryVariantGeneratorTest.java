@@ -100,10 +100,10 @@ class OpenAiQueryVariantGeneratorTest {
                 .isEqualTo(originalQuery.strip());
         assertThat(rawParams.model().orElseThrow().asString())
                 .isEqualTo("test-query-model");
-        assertThat(rawParams.maxOutputTokens()).contains(96L);
+        assertThat(rawParams.maxOutputTokens()).contains(256L);
         assertThat(rawParams.reasoning()
                 .orElseThrow()
-                .effort()).contains(ReasoningEffort.NONE);
+                .effort()).contains(ReasoningEffort.MINIMAL);
         assertThat(rawParams.store()).contains(false);
         assertThat(rawParams.serviceTier()).isEmpty();
         assertThat(rawParams.text()
@@ -125,8 +125,15 @@ class OpenAiQueryVariantGeneratorTest {
                         "explicit search operators",
                         "meaningfully different",
                         "unchanged original query",
-                        "exactly five search-query variants",
-                        "under 12 words",
+                        "distinct source-type retrieval strategies",
+                        "not five generic paraphrases",
+                        "official documentation",
+                        "educational explainers",
+                        "tutorials",
+                        "failure modes",
+                        "community discussions",
+                        "assigned source type",
+                        "under 18 words",
                         "Do not explain")
                 .doesNotContain(originalQuery.strip());
         verify(openAIClient, times(1)).responses();
